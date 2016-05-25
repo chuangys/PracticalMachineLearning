@@ -1,0 +1,75 @@
+---
+title: "Practical Machine Learning CourseProject"
+author: "Nicole"
+date: "2016/05/23"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Step1. Download & assign data
+
+The 1st step is to load the data into R dataset. And assign the training & testing data into variables final_training, final_testing respectively.
+
+Then, for the final_training dataset, we seperate it pre_training & pre_testing (70% & 30%) for modeling.
+
+```{r}
+final_training <- read.csv("D:\\Coursera\\Material\\08. Practical Machine Learning\\CourseProject\\pml-training.csv")
+final_testing <- read.csv("D:\\Coursera\\Material\\08. Practical Machine Learning\\CourseProject\\pml-testing.csv")
+
+library(lattice);library(ggplot2);library(caret);
+set.seed(33833)
+inTrain <- createDataPartition(y=final_training$classe,p=0.7,list=FALSE)
+pre_training <- final_training[inTrain,]
+pre_testing <- final_testing[-inTrain,]
+```
+
+## Step2. Data preprocess & Variable selection
+
+Let's do the briefly data explorer. As you can see, there are too many NA or Null variables in the dataset. We remove it from our modeling. 
+
+```{r}
+head(pre_training)
+colIdx <- c(7:11,37:49,60:68,84:86,102,113:124,140,151:159,160)
+training <- final_training[inTrain,colIdx]
+testing <- final_training[-inTrain,colIdx]
+```
+
+## Step3. Start modeling
+
+To start the modeling procedure. Here, I choose two model "rpart" & "lda" due to performance consideration. To compare these to model, I will evaluate the out of sample error estimation (accuracy) to choose the better one as the final model! 
+
+```{r}
+library(rpart);library(MASS);
+memory.limit(60000)
+set.seed(33833)
+rpart <- train(classe~., data=training[,-1],method="rpart")
+lda <- train(classe~., data=training[,-1],method="lda")
+rpart
+lda
+```
+
+## Step4. Out of Sample Error Estimation (Comparing model by it)
+
+Select to better model by accurance. Here, the rpart get 49% score & lda get 70% score.
+Hence, I choose lda as my final model.
+
+```{r}
+pred.rpart <- predict(rpart,testing)
+pred.lda <- predict(lda,testing)
+sum(pred.rpart == testing$classe) / length(testing$classe)
+sum(pred.lda == testing$classe) / length(testing$classe)
+```
+
+## Step5. The final prediction results
+From the out of sample error estimation, we select the model rpart with the higher accuracy.
+Then, applying this model to do prediction. Got the result below.
+
+```{r}
+pred.rpart <- predict(rpart,final_testing)
+pred.rpart
+```
