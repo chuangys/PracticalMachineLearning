@@ -426,12 +426,20 @@ testing &lt;- final_training[-inTrain,colIdx]</code></pre>
 <div id="step3.-start-modeling" class="section level2">
 <h2>Step3. Start modeling</h2>
 <p>To start the modeling procedure. Here, I choose two model “rpart” &amp; “lda” due to performance consideration. To compare these to model, I will evaluate the out of sample error estimation (accuracy) to choose the better one as the final model!</p>
-<pre class="r"><code>library(rpart);library(MASS);
-memory.limit(60000)</code></pre>
+<pre class="r"><code>library(rpart);library(MASS);library(randomForest);library(ggplot2);</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>## 
+## Attaching package: 'randomForest'</code></pre>
+<pre><code>## The following object is masked from 'package:ggplot2':
+## 
+##     margin</code></pre>
+<pre class="r"><code>memory.limit(60000)</code></pre>
 <pre><code>## [1] 60000</code></pre>
 <pre class="r"><code>set.seed(33833)
 rpart &lt;- train(classe~., data=training[,-1],method=&quot;rpart&quot;)
 lda &lt;- train(classe~., data=training[,-1],method=&quot;lda&quot;)
+rf &lt;- train(classe~., data=training[,-1],method=&quot;rf&quot;, ntree = 150)
 rpart</code></pre>
 <pre><code>## CART 
 ## 
@@ -467,22 +475,46 @@ rpart</code></pre>
 ##   0.6998909  0.6204494
 ## 
 ## </code></pre>
+<pre class="r"><code>rf</code></pre>
+<pre><code>## Random Forest 
+## 
+## 13737 samples
+##    52 predictor
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 13737, 13737, 13737, 13737, 13737, 13737, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy   Kappa    
+##    2    0.9880023  0.9848167
+##   27    0.9890561  0.9861515
+##   52    0.9779916  0.9721519
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 27.</code></pre>
 </div>
 <div id="step4.-out-of-sample-error-estimation-comparing-model-by-it" class="section level2">
 <h2>Step4. Out of Sample Error Estimation (Comparing model by it)</h2>
-<p>Select to better model by accurance. Here, the rpart get 49% score &amp; lda get 70% score. Hence, I choose lda as my final model.</p>
+<p>Select to better model by accurance. Here, the rpart get 49% score &amp; lda get 70% score &amp; random forest get 99% score. Hence, I choose the random forest as my final model.</p>
 <pre class="r"><code>pred.rpart &lt;- predict(rpart,testing)
 pred.lda &lt;- predict(lda,testing)
+pred.rf &lt;- predict(rf,testing)
 sum(pred.rpart == testing$classe) / length(testing$classe)</code></pre>
 <pre><code>## [1] 0.4895497</code></pre>
 <pre class="r"><code>sum(pred.lda == testing$classe) / length(testing$classe)</code></pre>
 <pre><code>## [1] 0.6987256</code></pre>
+<pre class="r"><code>sum(pred.rf == testing$classe) / length(testing$classe)</code></pre>
+<pre><code>## [1] 0.9906542</code></pre>
 </div>
 <div id="step5.-the-final-prediction-results" class="section level2">
 <h2>Step5. The final prediction results</h2>
-<p>From the out of sample error estimation, we select the model rpart with the higher accuracy. Then, applying this model to do prediction. Got the result below.</p>
-<pre class="r"><code>pred.rpart &lt;- predict(rpart,final_testing)
-pred.rpart</code></pre>
+<p>From the out of sample error estimation, we select the model random forest with the higher accuracy. Then, applying this model to do prediction. Got the result below.</p>
+<pre class="r"><code>#pred.rpart &lt;- predict(rpart,final_testing)
+#pred.rpart
+pred.rf &lt;- predict(rpart,final_testing)
+pred.rf</code></pre>
 <pre><code>##  [1] C A C A A C C A A A C C C A C A A A A C
 ## Levels: A B C D E</code></pre>
 </div>

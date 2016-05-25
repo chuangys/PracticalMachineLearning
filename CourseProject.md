@@ -326,7 +326,29 @@ To start the modeling procedure. Here, I choose two model "rpart" & "lda" due to
 
 
 ```r
-library(rpart);library(MASS);
+library(rpart);library(MASS);library(randomForest);library(ggplot2);
+```
+
+```
+## randomForest 4.6-12
+```
+
+```
+## Type rfNews() to see new features/changes/bug fixes.
+```
+
+```
+## 
+## Attaching package: 'randomForest'
+```
+
+```
+## The following object is masked from 'package:ggplot2':
+## 
+##     margin
+```
+
+```r
 memory.limit(60000)
 ```
 
@@ -338,6 +360,7 @@ memory.limit(60000)
 set.seed(33833)
 rpart <- train(classe~., data=training[,-1],method="rpart")
 lda <- train(classe~., data=training[,-1],method="lda")
+rf <- train(classe~., data=training[,-1],method="rf", ntree = 150)
 rpart
 ```
 
@@ -384,15 +407,41 @@ lda
 ## 
 ```
 
+```r
+rf
+```
+
+```
+## Random Forest 
+## 
+## 13737 samples
+##    52 predictor
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 13737, 13737, 13737, 13737, 13737, 13737, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy   Kappa    
+##    2    0.9880023  0.9848167
+##   27    0.9890561  0.9861515
+##   52    0.9779916  0.9721519
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 27.
+```
+
 ## Step4. Out of Sample Error Estimation (Comparing model by it)
 
-Select to better model by accurance. Here, the rpart get 49% score & lda get 70% score.
-Hence, I choose lda as my final model.
+Select to better model by accurance. Here, the rpart get 49% score & lda get 70% score & random forest get 99% score.
+Hence, I choose the random forest as my final model.
 
 
 ```r
 pred.rpart <- predict(rpart,testing)
 pred.lda <- predict(lda,testing)
+pred.rf <- predict(rf,testing)
 sum(pred.rpart == testing$classe) / length(testing$classe)
 ```
 
@@ -408,14 +457,24 @@ sum(pred.lda == testing$classe) / length(testing$classe)
 ## [1] 0.6987256
 ```
 
+```r
+sum(pred.rf == testing$classe) / length(testing$classe)
+```
+
+```
+## [1] 0.9906542
+```
+
 ## Step5. The final prediction results
-From the out of sample error estimation, we select the model rpart with the higher accuracy.
+From the out of sample error estimation, we select the model random forest with the higher accuracy.
 Then, applying this model to do prediction. Got the result below.
 
 
 ```r
-pred.rpart <- predict(rpart,final_testing)
-pred.rpart
+#pred.rpart <- predict(rpart,final_testing)
+#pred.rpart
+pred.rf <- predict(rpart,final_testing)
+pred.rf
 ```
 
 ```

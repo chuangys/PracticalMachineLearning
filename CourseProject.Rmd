@@ -2,8 +2,9 @@
 title: "Practical Machine Learning CourseProject"
 author: "Nicole"
 date: "2016/05/23"
-output: 
-  html_document: 
+output:
+  pdf_document: default
+  html_document:
     keep_md: yes
 ---
 
@@ -44,32 +45,38 @@ testing <- final_training[-inTrain,colIdx]
 To start the modeling procedure. Here, I choose two model "rpart" & "lda" due to performance consideration. To compare these to model, I will evaluate the out of sample error estimation (accuracy) to choose the better one as the final model! 
 
 ```{r}
-library(rpart);library(MASS);
+library(rpart);library(MASS);library(randomForest);library(ggplot2);
 memory.limit(60000)
 set.seed(33833)
 rpart <- train(classe~., data=training[,-1],method="rpart")
 lda <- train(classe~., data=training[,-1],method="lda")
+rf <- train(classe~., data=training[,-1],method="rf", ntree = 150)
 rpart
 lda
+rf
 ```
 
 ## Step4. Out of Sample Error Estimation (Comparing model by it)
 
-Select to better model by accurance. Here, the rpart get 49% score & lda get 70% score.
-Hence, I choose lda as my final model.
+Select to better model by accurance. Here, the rpart get 49% score & lda get 70% score & random forest get 99% score.
+Hence, I choose the random forest as my final model.
 
 ```{r}
 pred.rpart <- predict(rpart,testing)
 pred.lda <- predict(lda,testing)
+pred.rf <- predict(rf,testing)
 sum(pred.rpart == testing$classe) / length(testing$classe)
 sum(pred.lda == testing$classe) / length(testing$classe)
+sum(pred.rf == testing$classe) / length(testing$classe)
 ```
 
 ## Step5. The final prediction results
-From the out of sample error estimation, we select the model rpart with the higher accuracy.
+From the out of sample error estimation, we select the model random forest with the higher accuracy.
 Then, applying this model to do prediction. Got the result below.
 
 ```{r}
-pred.rpart <- predict(rpart,final_testing)
-pred.rpart
+#pred.rpart <- predict(rpart,final_testing)
+#pred.rpart
+pred.rf <- predict(rpart,final_testing)
+pred.rf
 ```
